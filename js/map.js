@@ -30,15 +30,22 @@ OFFER_FEATURES = [
   'wifi',
   'dishwasher',
   'parking',
-  'wahser',
+  'washer',
   'elevator',
   'conditioner',
 ],
+MAP = document.querySelector('.map'),
 MAP_PIN = document.querySelector('template').content.querySelector('.map__pin'),
-MAP_PINS = document.querySelector('.map__pins');
+MAP_PINS = MAP.querySelector('.map__pins'),
+MAP_CARD = document.querySelector('template').content.querySelector('.map__card'),
+MAP_FORM = document.querySelector('.ad-form'),
+MAIN_PIN = MAP.querySelector('.map__pin--main');
+
+
 
 // Этот массив хранит обьекты обявлений
 var ads = [],
+    pinsList, // Хранит все пины на карте
     count = 1; // Вспомогательная переменная для увеличения значения в аватарке
 
 
@@ -51,8 +58,8 @@ function Template() {
     avatar: 'img/avatars/user0' + count++ + '.png'
   };
   this.location = {
-    x: randomInteger(300, 900),
-    y: randomInteger(100, 500)
+    x: randomInteger(300, 900) + 25,
+    y: randomInteger(100, 500) + 70
   };
   this.offer = {
     title: randomType(OFFER_TITLE),
@@ -105,10 +112,100 @@ function createPin(i) {
   return pin;
 };
 
-var fragment = document.createDocumentFragment();
 
-for(var i = 0; i < ads.length; i++) {
-  fragment.appendChild(createPin(i));
+// Функция добавления пина на страницу
+function adPin() {
+  var fragment = document.createDocumentFragment();
+
+  for(var i = 0; i < ads.length; i++) {
+    fragment.appendChild(createPin(i));
+  }
+
+  MAP_PINS.appendChild(fragment);
 }
 
-MAP_PINS.appendChild(fragment);
+// Функция создания обьявления
+function createAd(i) {
+  var ad = MAP_CARD.cloneNode(true),
+      adImg = ad.querySelector('.popup__avatar'),
+      adTitle = ad.querySelector('.popup__title'),
+      adAddress = ad.querySelector('.popup__text--address'),
+      adPrice = ad.querySelector('.popup__text--price'),
+      adType = ad.querySelector('.popup__type'),
+      adCapacity = ad.querySelector('.popup__text--capacity'),
+      adTime = ad.querySelector('.popup__text--time'),
+      adFeatures = ad.querySelector('.popup__features'),
+      adDescr = ad.querySelector('.popup__description'),
+      fragment = document.createDocumentFragment();
+
+  adTitle.textContent = ads[i].offer.title;
+  adAddress.textContent = ads[i].offer.address;
+  adPrice.innderHTML = `<p class="popup__text popup__text--price">${ads[i].offer.price}&#x20bd;<span>/ночь</span></p>`;
+  adType.textContent = ads[i].offer.type === 'flat' ? 'Квартира' :
+  ads[i].offer.type === 'house' ? 'Дом' : 'Бунгало';
+  adCapacity.textContent = `${ads[i].offer.rooms} комнаты(-ы) для ${ads[i].offer.guests} гостей`;
+  adTime.textContent = `Заезд после ${ads[i].offer.checkin}, выезд до ${ads[i].offer.checkout}`;
+  adDescr.textContent = ads[i].offer.description;
+  adImg.src = ads[i].author.avatar;
+
+  for(var j = 0; j < ads[i].offer.features.length; j++) {
+    var li = document.createElement('li');
+    li.className = `popup__feature popup__feature--${ads[i].offer.features[j]}`;
+
+    fragment.appendChild(li);
+  }
+
+  adFeatures.appendChild(fragment);
+
+  return ad;
+}
+
+var fg = document.createDocumentFragment();
+for(var i = 0; i < ads.length; i++) {
+  fg.appendChild(createAd(i));
+}
+
+MAP.appendChild(fg);
+var mapAds = MAP.querySelectorAll('.map__card');
+// Функция делает поля формы активными или неактивными в зависимости от аргумента bool
+function changeFieldsetCondition(bool) {
+  var fieldset = MAP_FORM.querySelectorAll('fieldset');
+
+  fieldset.forEach((item, i) => fieldset[i].disabled = bool);
+}
+
+// Функция при нажатии на кнопку в центре добавляет пины и активирует форму
+function onMainPinClick() {
+  MAP.classList.remove('map--faded');
+  adPin();
+  MAP_FORM.classList.remove('ad-form--disabled');
+  changeFieldsetCondition(false);
+  pinsList = MAP_PINS.querySelectorAll('.map__pin:not(.map__pin--main)');
+}
+
+// При загрузке страницы все поля формы недоступны
+document.addEventListener('DOMContentLoaded', changeFieldsetCondition(true));
+
+
+// При нажатии на главный пин запускается функция onPinClick
+MAIN_PIN.addEventListener('mouseup', onMainPinClick);
+
+function test(e) {
+  var btn = e.target.parentElement,
+      t;
+	if(btn.type === 'button') {
+	  pinsList.forEach((item, i) => pinsList[i].classList.remove('map__pin--active'));
+    
+    btn.classList.add('map__pin--active');
+  } 
+  for(var i = 0; i < pinsList.length; i++) {
+    if(pinsList[i].classList.contains('map__pin--active')) {
+     mapAds[i].classList.remove('hidden');
+    }
+  };
+};
+
+MAP_PINS.addEventListener('click', test);
+
+
+

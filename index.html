@@ -17,7 +17,7 @@
       <img src="img/keksobooking.svg" alt="Keksobooking. Кексы по соседству" width="215" height="45">
     </div>
 
-    <section class="map">
+    <section class="map map--faded">
       <div class="map__pins">
         <div class="map__overlay">
           <h2 class="map__title">И снова Токио!</h2>
@@ -105,7 +105,7 @@
           </div>
         </fieldset>
 
-        <fieldset class="ad-form__element ad-form__element--wide">
+        <fieldset  class="ad-form__element ad-form__element--wide">
           <label class="ad-form__label" for="title">Заголовок объявления</label>
           <input id="title" name="title" type="text" placeholder="Милая, уютная квартирка в центре Токио">
         </fieldset>
@@ -239,7 +239,7 @@
   </footer>
 
   <template>
-    <article class="map__card popup">
+    <article class="map__card popup hidden">
       <img src="img/avatars/user01.png" class="popup__avatar" width="70" height="70" alt="Аватар пользователя">
       <button type="button" class="popup__close">Закрыть</button>
       <h3 class="popup__title">Уютное гнездышко для молодоженов</h3>
@@ -248,14 +248,7 @@
       <h4 class="popup__type">Квартира</h4>
       <p class="popup__text popup__text--capacity">2 комнаты для 3 гостей</p>
       <p class="popup__text popup__text--time">Заезд после 14:00, выезд до 10:00</p>
-      <ul class="popup__features">
-        <li class="popup__feature popup__feature--wifi"></li>
-        <li class="popup__feature popup__feature--dishwasher"></li>
-        <li class="popup__feature popup__feature--parking"></li>
-        <li class="popup__feature popup__feature--washer"></li>
-        <li class="popup__feature popup__feature--elevator"></li>
-        <li class="popup__feature popup__feature--conditioner"></li>
-      </ul>
+      <ul class="popup__features"></ul>
       <p class="popup__description">Великолепная квартира-студия в центре Токио. Подходит как туристам, так и бизнесменам. Квартира полностью укомплектована и недавно отремонтирована.</p>
       <div class="popup__photos">
         <img src="" class="popup__photo" width="45" height="40" alt="Фотография жилья">
