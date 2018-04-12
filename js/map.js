@@ -39,8 +39,9 @@ MAP_PIN = document.querySelector('template').content.querySelector('.map__pin'),
 MAP_PINS = MAP.querySelector('.map__pins'),
 MAP_CARD = document.querySelector('template').content.querySelector('.map__card'),
 MAP_FORM = document.querySelector('.ad-form'),
-MAIN_PIN = MAP.querySelector('.map__pin--main');
-
+MAIN_PIN = MAP.querySelector('.map__pin--main'),
+ENTER_KEY = 13,
+ESC_KEY = 27;
 
 
 // Этот массив хранит обьекты обявлений
@@ -160,13 +161,18 @@ function createAd(i) {
   return ad;
 }
 
-var fg = document.createDocumentFragment();
-for(var i = 0; i < ads.length; i++) {
-  fg.appendChild(createAd(i));
-}
+// Отрисовка обьявлений на карте
+(function adAdOnMap() {
+  var fragment = document.createDocumentFragment();
 
-MAP.appendChild(fg);
-var mapAds = MAP.querySelectorAll('.map__card');
+  for(var i = 0; i < ads.length; i++) {
+    fragment.appendChild(createAd(i));
+  };
+
+  MAP.appendChild(fragment);
+})();
+
+
 // Функция делает поля формы активными или неактивными в зависимости от аргумента bool
 function changeFieldsetCondition(bool) {
   var fieldset = MAP_FORM.querySelectorAll('fieldset');
@@ -187,25 +193,107 @@ function onMainPinClick() {
 document.addEventListener('DOMContentLoaded', changeFieldsetCondition(true));
 
 
-// При нажатии на главный пин запускается функция onPinClick
+// При нажатии на главный пин запускается функция onMainPinClick
 MAIN_PIN.addEventListener('mouseup', onMainPinClick);
 
-function test(e) {
-  var btn = e.target.parentElement,
-      t;
+// Функция вешает класс актив на пин
+function onPinClickEvent(e) {
+  var btn = e.target.parentElement;
+  
 	if(btn.type === 'button') {
 	  pinsList.forEach((item, i) => pinsList[i].classList.remove('map__pin--active'));
     
     btn.classList.add('map__pin--active');
-  } 
+  };
+
   for(var i = 0; i < pinsList.length; i++) {
     if(pinsList[i].classList.contains('map__pin--active')) {
-     mapAds[i].classList.remove('hidden');
-    }
+     showAd(i);
+     break;
+    };
   };
+
+  MAP.addEventListener('click', closeAd);
 };
 
-MAP_PINS.addEventListener('click', test);
+
+// Функция показывает обьявления соответствующие нажатому пину
+function showAd(value) {
+  var adsList = MAP.querySelectorAll('.map__card');
+
+  for(var i = 0; i < adsList.length; i++) {
+    if(adsList[i].classList.contains('hidden')) continue;
+    adsList[i].classList.add('hidden');
+  }
+
+  adsList[value].classList.remove('hidden');
+}
+
+// Функция скрывает обьявления по нажатию на крестик, также убирает класс active у пина
+function closeAd(e) {
+  if(e.target.parentElement.classList.contains('map__card')) {
+    e.target.parentElement.classList.add('hidden');
+    for(var i = 0; i < pinsList.length; i++) {
+      if(pinsList[i].classList.contains('map__pin--active')) {
+        pinsList[i].classList.remove('map__pin--active');
+        break;
+      };
+    };
+    MAP.removeEventListener('click', closeAd);
+  }
+}
+
+// Обработчик события нажатия на пин
+MAP_PINS.addEventListener('click', onPinClickEvent);
+MAP_PINS.addEventListener('keydown', openClose);
+
+// Функция открытия и закрытия по нажатию на клавишы
+function openClose(e) {
+  var adsList = MAP.querySelectorAll('.map__card');
+  if(e.keyCode === ESC_KEY) {
+    for(var i = 0; i < pinsList.length; i++) {
+      if(pinsList[i].classList.contains('map__pin--active')) {
+        pinsList[i].classList.remove('map__pin--active');
+        adsList[i].classList.add('hidden');
+        break;
+      }
+    }
+  } else if(e.keyCode === ENTER_KEY) {
+    for(var i = 0; i < pinsList.length; i++) {
+      pinsList.forEach((item, i) => pinsList[i].classList.remove('map__pin--active'));
+    
+      e.target.classList.add('map__pin--active');
+    }
+  };
+}
+ 
+
+var timeIn = document.querySelector('#timein'),
+    timeOut = document.querySelector('#timeout'),
+    houseType = document.querySelector('#type');
+
+timeIn.addEventListener('click', function(e) {
+  var timeOutOptions = timeOut.querySelectorAll('option');
+      
+  for(var i = 0; i < timeOutOptions.length; i++) {
+    if(timeOutOptions[i].value === e.target.value) {
+        timeOutOptions[i].selected = true;
+        break;
+    };
+  ;}
+});
 
 
+houseType.addEventListener('click', function(e) {
+	var price = document.querySelector('#price');
+	if(e.target.value === 'flat') {
+		price.min = '1000';
+    } else if (e.target.value === 'bungalo') {
+    	price.min = '0'
+	} else if (e.target.value === 'palace') {
+    	price.min = '10000'
+	} else {
+    	price.min = '5000'
+	}
+});
 
